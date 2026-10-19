@@ -61,7 +61,9 @@ class AddStockDialog(QDialog):
 
     def validate_form(self):
         if not self.symbol_input.text().strip():
-            QMessageBox.warning(self, "Missing symbol", "Enter a stock symbol.")
+            QMessageBox.warning(
+                self, "Missing symbol", "Enter a stock symbol."
+            )
             return
 
         if self.quantity_input.value() > 0 and self.cost_input.value() <= 0:
@@ -84,62 +86,210 @@ class PortfolioUI(QWidget):
         self.current_portfolio_id = None
         self.refreshing = False
 
+        # JPMorgan-inspired institutional finance styling.
+        # This changes appearance, not the widget layout.
         self.setStyleSheet("""
             QWidget {
-                background-color: #151922;
-                color: #edf2f7;
+                background-color: #F4F6F9;
+                color: #172B45;
+                font-family: "Segoe UI";
                 font-size: 13px;
             }
+
             QLabel#heading {
-                font-size: 27px;
+                font-family: "Georgia";
+                font-size: 29px;
                 font-weight: bold;
-                color: white;
+                color: #102A43;
+                padding: 2px 0;
             }
-            QLabel#subtitle { color: #aab5c5; }
-            QLabel.summary {
-                background-color: #222a38;
-                border: 1px solid #354156;
-                border-radius: 10px;
-                padding: 15px;
+
+            QLabel#subtitle {
+                color: #64748B;
+                font-size: 12px;
+            }
+
+            QLabel[class="summary"] {
+                background-color: #FFFFFF;
+                color: #183153;
+                border: 1px solid #D9E1EA;
+                border-radius: 5px;
+                padding: 17px;
+                font-family: "Segoe UI";
                 font-size: 15px;
-                font-weight: bold;
+                font-weight: 600;
             }
+
             QLineEdit, QComboBox, QDoubleSpinBox {
-                background-color: #222a38;
-                border: 1px solid #3a465a;
-                border-radius: 6px;
-                padding: 9px;
-                color: white;
+                background-color: #FFFFFF;
+                color: #172B45;
+                border: 1px solid #C8D2DE;
+                border-radius: 4px;
+                padding: 9px 11px;
+                selection-background-color: #244C78;
+                selection-color: #FFFFFF;
             }
+
+            QLineEdit:focus, QComboBox:focus,
+            QDoubleSpinBox:focus {
+                border: 1px solid #244C78;
+                background-color: #FFFFFF;
+            }
+
+            QLineEdit::placeholder {
+                color: #8795A7;
+            }
+
+            QComboBox::drop-down {
+                border: none;
+                width: 25px;
+            }
+
+            QComboBox QAbstractItemView {
+                background-color: #FFFFFF;
+                color: #172B45;
+                selection-background-color: #E3ECF6;
+                selection-color: #102A43;
+                border: 1px solid #C8D2DE;
+            }
+
             QPushButton {
-                background-color: #2864dc;
-                color: white;
-                border: none;
-                border-radius: 6px;
+                background-color: #17365D;
+                color: #FFFFFF;
+                border: 1px solid #17365D;
+                border-radius: 4px;
                 padding: 10px 14px;
-                font-weight: bold;
+                font-family: "Segoe UI";
+                font-size: 12px;
+                font-weight: 600;
             }
-            QPushButton:hover { background-color: #3978f0; }
-            QPushButton:disabled { background-color: #526078; }
-            QPushButton#removeButton { background-color: #9f303b; }
-            QPushButton#secondaryButton { background-color: #45536a; }
+
+            QPushButton:hover {
+                background-color: #244C78;
+                border-color: #244C78;
+            }
+
+            QPushButton:pressed {
+                background-color: #102A43;
+                border-color: #102A43;
+            }
+
+            QPushButton:disabled {
+                background-color: #D5DCE5;
+                color: #8290A1;
+                border-color: #D5DCE5;
+            }
+
+            QPushButton#removeButton {
+                background-color: #FFFFFF;
+                color: #A23B42;
+                border: 1px solid #D8B9BC;
+            }
+
+            QPushButton#removeButton:hover {
+                background-color: #FBECEE;
+                border-color: #A23B42;
+            }
+
+            QPushButton#secondaryButton {
+                background-color: #FFFFFF;
+                color: #17365D;
+                border: 1px solid #C8D2DE;
+            }
+
+            QPushButton#secondaryButton:hover {
+                background-color: #EAF0F6;
+                border-color: #9EAFBF;
+            }
+
             QTableWidget {
-                background-color: #1c2330;
-                alternate-background-color: #222a38;
-                gridline-color: #354156;
-                border: 1px solid #354156;
-                border-radius: 8px;
-                selection-background-color: #315da8;
-                selection-color: white;
+                background-color: #FFFFFF;
+                alternate-background-color: #F7F9FC;
+                color: #243B53;
+                gridline-color: #E8EDF2;
+                border: 1px solid #D9E1EA;
+                border-radius: 5px;
+                selection-background-color: #E3ECF6;
+                selection-color: #102A43;
+                outline: none;
             }
-            QHeaderView::section {
-                background-color: #293448;
-                color: white;
-                padding: 10px;
+
+            QTableWidget::item {
+                padding: 9px 7px;
                 border: none;
+                border-bottom: 1px solid #EDF0F4;
+            }
+
+            QTableWidget::item:selected {
+                background-color: #E3ECF6;
+                color: #102A43;
+            }
+
+            QHeaderView::section {
+                background-color: #EAF0F6;
+                color: #17365D;
+                padding: 12px 9px;
+                border: none;
+                border-bottom: 2px solid #B69A62;
+                font-family: "Segoe UI";
+                font-size: 11px;
                 font-weight: bold;
             }
-            QDialog { background-color: #151922; }
+
+            QTableCornerButton::section {
+                background-color: #EAF0F6;
+                border: none;
+            }
+
+            QScrollBar:vertical {
+                background-color: #F4F6F9;
+                width: 10px;
+                margin: 0;
+                border: none;
+            }
+
+            QScrollBar::handle:vertical {
+                background-color: #C2CCD8;
+                border-radius: 4px;
+                min-height: 25px;
+            }
+
+            QScrollBar::handle:vertical:hover {
+                background-color: #8FA1B5;
+            }
+
+            QScrollBar::add-line:vertical,
+            QScrollBar::sub-line:vertical {
+                height: 0;
+            }
+
+            QDialog {
+                background-color: #F4F6F9;
+                color: #172B45;
+            }
+
+            QDialog QLabel {
+                color: #243B53;
+            }
+
+            QDialogButtonBox QPushButton {
+                min-width: 75px;
+            }
+
+            QMessageBox {
+                background-color: #F4F6F9;
+            }
+
+            QMessageBox QLabel {
+                color: #172B45;
+            }
+
+            QToolTip {
+                background-color: #102A43;
+                color: #FFFFFF;
+                border: 1px solid #B69A62;
+                padding: 5px;
+            }
         """)
 
         root = QVBoxLayout(self)
@@ -370,7 +520,9 @@ class PortfolioUI(QWidget):
         try:
             database.rename_portfolio(portfolio_id, name)
             self.load_portfolios(select_id=portfolio_id)
-            self.status_label.setText(f"Portfolio renamed to {name.strip()}.")
+            self.status_label.setText(
+                f"Portfolio renamed to {name.strip()}."
+            )
         except Exception as error:
             QMessageBox.warning(
                 self, "Rename failed",
@@ -422,7 +574,7 @@ class PortfolioUI(QWidget):
 
         raw_symbol = dialog.symbol_input.text().strip().upper()
         company = dialog.company_input.text().strip()
-        quantity = dialog.quantity_input.value()
+        quantity = self.quantity_value(dialog)
         average_cost = dialog.cost_input.value()
 
         try:
@@ -448,6 +600,10 @@ class PortfolioUI(QWidget):
                 self, "Could not add stock",
                 f"Could not add {raw_symbol} to this portfolio.\n\n{error}"
             )
+
+    @staticmethod
+    def quantity_value(dialog):
+        return dialog.quantity_input.value()
 
     def load_stocks(self):
         self.stocks = database.get_all_stocks(
@@ -577,7 +733,7 @@ class PortfolioUI(QWidget):
 
                 if col == 5 and pnl is not None:
                     if pnl > 0:
-                        item.setForeground(Qt.GlobalColor.green)
+                        item.setForeground(Qt.GlobalColor.darkGreen)
                     elif pnl < 0:
                         item.setForeground(Qt.GlobalColor.red)
 
@@ -612,19 +768,22 @@ class PortfolioUI(QWidget):
         )
 
         color = (
-            "#42d392" if pnl > 0
-            else "#ff707b" if pnl < 0
-            else "#edf2f7"
+            "#237A57" if pnl > 0
+            else "#B42332" if pnl < 0
+            else "#183153"
         )
         self.pnl_card.setStyleSheet(
-            f"color: {color}; background-color: #222a38;"
-            "border: 1px solid #354156; border-radius: 10px;"
-            "padding: 15px; font-size: 15px; font-weight: bold;"
+            f"color: {color}; background-color: #FFFFFF;"
+            "border: 1px solid #D9E1EA; border-radius: 5px;"
+            "padding: 17px; font-family: 'Segoe UI';"
+            "font-size: 15px; font-weight: 600;"
         )
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setStyle("Fusion")
+
     window = QDialog()
     window.setWindowTitle("NSE Portfolio Tracker")
     window.resize(1400, 820)
